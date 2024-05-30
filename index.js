@@ -68,6 +68,7 @@ async function handleRequest(request) {
 		const { categoryIndex, siteIndex, siteName, siteUrl, siteIcon } = requestBody;
 		navigationData.categories[categoryIndex].sites[siteIndex] = { name: siteName, url: siteUrl, icon: siteIcon };
 		await setNavigationData(navigationData);
+		
 		return new Response(JSON.stringify({ message: 'Site updated successfully' }), {
 			headers: { 'Content-Type': 'application/json; charset=utf-8' },
 		});
@@ -492,7 +493,24 @@ async function renderNavigationPage() {
             function closeEditModal() {
                 editModal.style.display = "none";
             }
+			function getAllData() {
+				// 发送 GET 请求
+				fetch('/data')
+  				.then(response => {
+    				// 将响应解析为 JSON 格式
+    				return response.json();
+  				})
+  				.then(data => {
+    				// 打印响应数据到控制台
+					// console.log("获取本地kv")
+    				console.log(data);
+  				})
+  				.catch(error => {
+   			 		// 处理错误
+   			 		console.error('Fetch 请求出错:', error);
+  				});
 
+			}
             document.getElementById('editSiteForm').addEventListener('submit', async function(event) {
                 event.preventDefault();
                 const formData = new FormData(event.target);
@@ -508,17 +526,15 @@ async function renderNavigationPage() {
 
 				let response;
 				if(curCaIndex ===  selectedIndex ) {
-					data.newProperty = 'siteIndex';
-					data.anotherProperty = formData.get('siteIndex');
+					data.siteIndex = siteIndex;
 					response = await fetch('/edit-site', {
 						method: 'POST',
 						headers: { 'Content-Type': 'application/json' },
 						body: JSON.stringify(data)
 					});
 				}else {
-                    console.log("start delete")
+                    
 					await deleteSiteEasy(curCaIndex, siteIndex)
-                    console.log("delete finish")
                     const resp = await fetch('/add-site', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -550,3 +566,4 @@ async function renderNavigationPage() {
 	html += '</body></html>';
 	return html;
 }
+
